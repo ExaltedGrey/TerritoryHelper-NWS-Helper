@@ -1,0 +1,6 @@
+# Protect private congregation territory exports & logs
+*.json
+*.geojson
+*.csv
+*.xlsx
+*Import Log*.txt

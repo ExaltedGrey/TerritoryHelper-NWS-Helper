@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Territory Helper → New World Scheduler Tool</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #d8e0ea;
+      --border-strong: #bcc8d8;
+      --text: #1b2430;
+      --text-muted: #5a687a;
+      --primary: #1d5fa7;
+      --primary-hover: #154c88;
+      --primary-soft: #eaf2fb;
+      --green: #16794c;
+      --green-soft: #e6f6ee;
+      --red: #c62828;
+      --red-soft: #fdecec;
+      --amber: #9a5b00;
+      --amber-soft: #fff6e0;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(15, 29, 48, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      background: linear-gradient(135deg, #16487f 0%, #1d5fa7 100%);
+      color: #fff;
+      padding: 20px 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .privacy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 0.8rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    main {
+      max-width: 1320px;
+      margin: 20px auto 48px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface-alt);
+      padding: 26px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .dropzone-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+    }
+
+    .file-loaded-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--green-soft);
+      border: 1px solid #b9e4ce;
+      color: var(--green);
+      font-size: 0.9rem;
+    }
+
+    .file-loaded-bar.show { display: flex; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 11px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--primary); }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px 16px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .field input[type="text"],
+    .field select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 22px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .check-label input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 7px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-alt);
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .kpi-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .kpi.kpi-green .kpi-value { color: var(--green); }
+    .kpi.kpi-red .kpi-value { color: var(--red); }
+    .kpi.kpi-amber .kpi-value { color: var(--amber); }
+
+    .preview-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 820px) {
+      .preview-split { grid-template-columns: 1fr; }
+    }
+
+    .preview-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-alt);
+      padding: 12px;
+    }
+
+    .preview-box h4 {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+    }
+
+    .preview-pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.82rem;
+      max-height: 320px;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .filter-bar select,
+    .filter-bar input {
+      padding: 7px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      font-size: 0.86rem;
+      background: #fff;
+    }
+
+    .filter-bar input {
+      flex: 1 1 200px;
+      min-width: 180px;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 520px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #eef3f9;
+      color: var(--text);
+      font-weight: 600;
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border-strong);
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    tbody td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #edf1f6;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background: #f8fbff; }
+
+    td.editable {
+      cursor: text;
+      min-width: 60px;
+    }
+
+    td.editable:focus {
+      outline: 2px solid var(--primary);
+      background: #fff;
+      border-radius: 3px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .badge-avail {
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid #b9e4ce;
+    }
+
+    .badge-dnc {
+      background: var(--red-soft);
+      color: var(--red);
+      border: 1px solid #f4bebe;
+    }
+
+    .del-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .del-btn:hover {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    details.panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-alt);
+      padding: 10px 14px;
+      margin-top: 14px;
+    }
+
+    details.panel summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .flagged-list {
+      margin-top: 10px;
+      max-height: 260px;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.83rem;
+    }
+
+    .flagged-item {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f3f7;
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .flagged-item:last-child { border-bottom: none; }
+
+    .flagged-terr {
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+      min-width: 170px;
+    }
+
+    .guide-steps {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .guide-steps li { margin-bottom: 6px; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1b2430;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 99;
+    }
+
+    .toast.show { opacity: 1; }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 20px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div>
+        <h1>Territory Helper → New World Scheduler Tool</h1>
+        <p>Clean territory notes for NWS GeoJSON import &amp; extract addresses from notes into an NWS Locations CSV</p>
+      </div>
+      <div class="privacy-pill" title="Everything runs locally in your browser">
+        <span>🔒</span>
+        <span>100% Offline &amp; Private — Data never leaves your computer</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- File Upload Card -->
+    <div class="card">
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload Territory Helper JSON file">
+        <div class="dropzone-title">Drop your Territory Helper GeoJSON (<code>.json</code>) file here, or click to browse</div>
+        <div class="dropzone-sub">Works with raw Territory Helper exports (<code>TerritoryNotes</code>) or already-cleaned GeoJSON files.</div>
+        <input id="fileInput" type="file" accept=".json,.geojson,application/json" style="display:none" />
+      </div>
+      <div id="fileLoadedBar" class="file-loaded-bar">
+        <span id="fileLoadedInfo"></span>
+        <button id="changeFileBtn" class="btn btn-sm" type="button">Load Different File</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="setup" role="tab" aria-selected="true">
+        1. Fix Territory Setup &amp; Naming
+      </button>
+      <button class="tab-btn" data-tab="notes" role="tab" aria-selected="false">
+        2. Move Notes → NWS Notes (GeoJSON)
+      </button>
+      <button class="tab-btn" data-tab="locations" role="tab" aria-selected="false">
+        3. Extract Locations → NWS CSV
+      </button>
+    </div>
+
+    <!-- TAB 1: FIX TERRITORY SETUP & NAMING -->
+    <section id="tab-setup" class="tab-panel active">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+          <div>
+            <h3 style="margin:0 0 4px; font-size:1.02rem;">Automatic NWS Territory Naming &amp; Setup Check</h3>
+            <div class="hint" style="margin:0;">
+              New World Scheduler requires territory numbers to start with digits (e.g. <code>81-R</code>, not <code>R-81</code>) and be unique inside each category—otherwise territories import as <strong>Territory 0</strong> or overwrite each other. Fixes enabled here automatically apply to <strong>both</strong> your GeoJSON (Tab 2) and Locations CSV (Tab 3).
+            </div>
+          </div>
+          <button id="btnAutoAssignCodes" class="btn btn-sm" type="button" disabled>
+            ✨ Auto-Assign Unique Category Codes
+          </button>
+        </div>
+
+        <div class="checkbox-row" style="margin-top:8px;">
+          <label class="check-label">
+            <input id="optNormNumbers" type="checkbox" checked />
+            Normalize non-standard numbers to <code>&lt;Number&gt;-&lt;Suffix&gt;</code> (e.g. <code>R-81</code> → <code>81-R</code>, <code>A12</code> → <code>12-A</code>, fills blank numbers)
+          </label>
+          <label class="check-label">
+            <input id="optFixDuplicates" type="checkbox" checked />
+            Auto-fix duplicate numbers inside the same category (adds <code>-A</code>, <code>-B</code> suffix to prevent overwrites)
+          </label>
+          <label class="check-label">
+            <input id="optAppendCatSuffix" type="checkbox" />
+            Append category code as suffix when missing (e.g. <code>3</code> in Rural → <code>3-R</code>)
+          </label>
+          <label class="check-label">
+            <input id="optSyncLabel" type="checkbox" checked />
+            Keep GeoJSON <code>name</code> synced with fixed Category &amp; Number
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnQuickDownloadJson" class="btn btn-primary" type="button" disabled>
+            ⬇ Download Fixed NWS-Ready GeoJSON (.json)
+          </button>
+          <button id="btnGoToNotes" class="btn" type="button" disabled>
+            Next: Preview Notes (Tab 2) →
+          </button>
+          <button id="btnGoToLocations" class="btn" type="button" disabled>
+            Next: Extract Locations CSV (Tab 3) →
+          </button>
+        </div>
+      </div>
+
+      <!-- Setup KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div id="kpiSetupTotal" class="kpi-value">—</div>
+          <div class="kpi-label">Total Territories</div>
+        </div>
+        <div class="kpi">
+          <div id="kpiSetupCats" class="kpi-value">—</div>
+          <div class="kpi-label">Categories</div>
+        </div>
+        <div class="kpi kpi-amber">
+          <div id="kpiSetupBadNums" class="kpi-value">—</div>
+          <div class="kpi-label">Non-Standard Numbers Fixed</div>
+        </div>
+        <div class="kpi kpi-red">
+          <div id="kpiSetupDups" class="kpi-value">—</div>
+          <div class="kpi-label">Duplicate Collisions Fixed</div>
+        </div>
+        <div class="kpi kpi-green">
+          <div id="kpiSetupCodeWarn" class="kpi-value">—</div>
+          <div class="kpi-label">Shared First-Letter Codes</div>
+        </div>
+      </div>
+
+      <!-- Category Mapping Editor -->
+      <div class="card">
+        <h3 style="margin:0 0 6px; font-size:0.98rem;">Categories &amp; Codes</h3>
+        <div class="hint" style="margin-bottom:10px;">
+          Leave Category Codes blank to keep your existing NWS codes (e.g. <code>C-3-H</code>), or enter unique 1–3 letter codes (or click <strong>Auto-Assign Unique Category Codes</strong> above) if you are setting up NWS fresh. You can also rename categories inline.
+        </div>
+        <div class="table-wrap" style="max-height:260px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Original Category (Territory Helper)</th>
+                <th>Count</th>
+                <th>New Category Name (Editable)</th>
+                <th>Category Code (Editable)</th>
+                <th>Sample Territory in NWS</th>
+              </tr>
+            </thead>
+            <tbody id="setupCatsTbody">
+              <tr><td colspan="5" class="empty-state">Load a Territory Helper <code>.json</code> file above to inspect categories.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details id="setupChangesPanel" class="panel" open>
+          <summary id="setupChangesSummary">Territory Naming Changes Preview (0)</summary>
+          <div id="setupChangesList" class="flagged-list"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- TAB 3: LOCATIONS CSV -->
+    <section id="tab-locations" class="tab-panel">
+      <div class="card">
+        <div class="controls-grid">
+          <div class="field">
+            <label for="optCsvFormat">CSV Export Format (Match Your NWS Import Menu)</label>
+            <select id="optCsvFormat">
+              <option value="th">Territory Helper Locations CSV (for NWS: Import → Locations from Territory Helper)</option>
+              <option value="nws">NWS Standard CSV (for NWS: Import → Territory Addresses from CSV file)</option>
+              <option value="nws_boundary">NWS Boundary-Match CSV (Lat/Lon only — drops into existing polygons)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="optDncMode">Do Not Calls (DNC) Handling</label>
+            <select id="optDncMode">
+              <option value="include">Include &amp; mark Status as DNC</option>
+              <option value="exclude">Exclude DNCs (use if DNCs are already pinned in Territory Helper)</option>
+              <option value="only">Export DNCs Only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="optDefaultState">Default State (fallback)</label>
+            <input id="optDefaultState" type="text" value="" maxlength="2" placeholder="Auto (e.g. TX)" />
+          </div>
+          <div class="field">
+            <label for="optDefaultCity">Default City (optional fallback)</label>
+            <input id="optDefaultCity" type="text" value="" placeholder="Auto-detected per territory" />
+          </div>
+          <div class="field">
+            <label for="optDefaultType">Default Address Type</label>
+            <select id="optDefaultType">
+              <option value="House">House</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Business">Business</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <label class="check-label">
+            <input id="optSplitSuffix" type="checkbox" checked />
+            Split Number &amp; Suffix (e.g. <code>3-H</code> → Number <code>3</code>, Suffix <code>H</code>)
+          </label>
+          <label class="check-label">
+            <input id="optDedup" type="checkbox" checked />
+            Deduplicate addresses per territory (keeps DNC status)
+          </label>
+          <label class="check-label">
+            <input id="optPoBox" type="checkbox" checked />
+            Include PO Boxes
+          </label>
+          <label class="check-label">
+            <input id="optPhone" type="checkbox" />
+            Include Phone Territories
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnDownloadCsv" class="btn btn-primary" type="button" disabled>
+            ⬇ Download NWS Locations CSV
+          </button>
+          <button id="btnDownloadFilteredCsv" class="btn" type="button" disabled>
+            ⬇ Download Filtered / Selected Territory CSV
+          </button>
+          <button id="btnGeocodeFiltered" class="btn" type="button" disabled title="Looks up Latitude/Longitude for the currently filtered locations using OpenStreetMap Nominatim (~1 addr/sec)">
+            📍 Resolve Lat/Lon (Filtered Rows)
+          </button>
+          <button id="btnCopyCsv" class="btn" type="button" disabled>
+            📋 Copy CSV
+          </button>
+          <button id="btnAddRow" class="btn" type="button" disabled>
+            ＋ Add Location Row
+          </button>
+        </div>
+        <div id="geocodeStatus" class="hint" style="margin-top:8px; display:none;"></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div id="kpiTerritories" class="kpi-value">—</div>
+          <div class="kpi-label">Territories with Locations</div>
+        </div>
+        <div class="kpi">
+          <div id="kpiTotal" class="kpi-value">—</div>
+          <div class="kpi-label">Total Locations Ready</div>
+        </div>
+        <div class="kpi kpi-green">
+          <div id="kpiAvailable" class="kpi-value">—</div>
+          <div class="kpi-label">Available</div>
+        </div>
+        <div class="kpi kpi-red">
+          <div id="kpiDnc" class="kpi-value">—</div>
+          <div class="kpi-label">Do Not Call (DNC)</div>
+        </div>
+        <div class="kpi kpi-amber">
+          <div id="kpiFlagged" class="kpi-value">—</div>
+          <div class="kpi-label">Unparsed Lines to Review</div>
+        </div>
+      </div>
+
+      <!-- Interactive Table Card -->
+      <div class="card">
+        <div class="filter-bar">
+          <select id="filterCategory">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filterTerritory">
+            <option value="">All Territories</option>
+          </select>
+          <select id="filterStatus">
+            <option value="">All Statuses</option>
+            <option value="Available">Available</option>
+            <option value="DNC">DNC</option>
+          </select>
+          <input id="filterSearch" type="text" placeholder="Search street, number, city, name, or notes..." />
+        </div>
+
+        <div class="hint" style="margin-bottom:8px;">
+          Tip: Click any cell below to edit before exporting, or click a green/red Status badge to toggle between <strong>Available</strong> and <strong>DNC</strong>.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Code</th>
+                <th>TerritoryNumber</th>
+                <th>Suffix</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Number</th>
+                <th>Street</th>
+                <th>Apt/Unit</th>
+                <th>City</th>
+                <th>State</th>
+                <th>PostalCode</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Notes</th>
+                <th>Lat / Lon</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="locationsTbody">
+              <tr>
+                <td colspan="17" class="empty-state">Load a Territory Helper <code>.json</code> file above to extract locations.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <span id="pagerInfo">Showing 0 locations</span>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button id="btnPrevPage" class="btn btn-sm" type="button" disabled>← Previous</button>
+            <span id="pageNumLabel">Page 1 / 1</span>
+            <button id="btnNextPage" class="btn btn-sm" type="button" disabled>Next →</button>
+          </div>
+        </div>
+
+        <!-- Flagged lines drawer -->
+        <details id="flaggedPanel" class="panel">
+          <summary id="flaggedSummary">Unparsed / Unusual Lines to Spot-Check (0)</summary>
+          <div class="hint" style="margin-top:6px;">
+            These lines in the territory notes didn't match a standard address pattern (often general territory instructions, comments, or typos like <code>Address: 1o4</code>). Review them just in case an address needs to be added manually with "+ Add Location Row".
+          </div>
+          <div id="flaggedList" class="flagged-list"></div>
+        </details>
+
+        <!-- How to import into NWS -->
+        <details class="panel">
+          <summary>How to Import This CSV into New World Scheduler (Read Before Bulk Importing)</summary>
+          <ol class="guide-steps">
+            <li><strong>Test 1 Territory First (Recommended):</strong> Filter to a single territory (e.g., <code>Category R - Rural 3-R</code>), click <strong>Resolve Lat/Lon (Filtered Rows)</strong> so each address gets exact map coordinates, click <strong>Download Filtered / Selected Territory CSV</strong>, then in NWS select that specific territory and click <strong>Addresses → Import Addresses → Territory Addresses from CSV file</strong>.</li>
+            <li><strong>For Bulk All-Territory Geocoding (5,000+ addresses):</strong> Use the companion <code>geocode_nws_locations.py</code> script, which uses the free official US Census Batch Geocoder to resolve all addresses &amp; verify coordinates against your territory boundaries in seconds.</li>
+            <li><strong>Territory Naming &amp; Matching:</strong> This CSV exports clean UTF-8 (no BOM) with exact NWS headers: <code>Category</code>, <code>CategoryCode</code>, <code>TerritoryNumber</code>, <code>Suffix</code>, <code>Type</code>, <code>Status</code>, <code>Number</code>, <code>Street</code>, <code>ApartmentNumber</code>, <code>City</code>, <code>State</code>, <code>PostalCode</code>, <code>Name</code>, <code>Phone</code>, <code>Notes</code>, <code>Latitude</code>, <code>Longitude</code> so your territory naming conventions (e.g., <code>C-2-B</code>, <code>C-3-H</code>) stay intact.</li>
+            <li><strong>Already have Do Not Calls pinned in Territory Helper?</strong> Set <em>Do Not Calls (DNC) Handling</em> above to <strong>Exclude DNCs</strong> before downloading so you don't create duplicate DNC entries.</li>
+            <li><strong>Always check the NWS Import Log</strong> after importing to confirm every address matched cleanly.</li>
+          </ol>
+        </details>
+      </div>
+    </section>
+
+    <!-- TAB 2: MOVE NOTES TO NWS NOTES (GEOJSON) -->
+    <section id="tab-notes" class="tab-panel">
+      <div class="card">
+        <div class="controls-grid">
+          <div class="field">
+            <label for="optNotesMode">How to handle existing NWS Notes label (e.g. "Rural Territory #3")</label>
+            <select id="optNotesMode">
+              <option value="prepend">Prepend existing label at the top of Notes &amp; clear Custom (Recommended)</option>
+              <option value="replace">Replace Notes with Territory Helper notes &amp; clear Custom</option>
+              <option value="swap">Swap them (Territory Helper notes → Notes, short label → Custom)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="previewTerrSelect">Preview Territory</label>
+            <select id="previewTerrSelect">
+              <option value="">Load a JSON file first...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <label class="check-label">
+            <input id="optCleanHtml" type="checkbox" checked />
+            Clean HTML tags &amp; entities (<code>&amp;nbsp;</code>, <code>&amp;ndash;</code>, tables, lists) into readable plain text
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnDownloadGeoJson" class="btn btn-primary" type="button" disabled>
+            ⬇ Download NWS-Ready GeoJSON (.json)
+          </button>
+          <span id="notesSummaryText" class="hint" style="margin:0;"></span>
+        </div>
+
+        <div class="preview-split">
+          <div class="preview-box">
+            <h4>Before (Original Territory Helper JSON)</h4>
+            <pre id="previewBefore" class="preview-pre">Load a Territory Helper .json file to preview.</pre>
+          </div>
+          <div class="preview-box">
+            <h4>After (Ready for New World Scheduler)</h4>
+            <pre id="previewAfter" class="preview-pre">Load a Territory Helper .json file to preview.</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. HTML -> Plain Text Cleaner (zero external dependencies)
+    // =========================================================================
+    const ENTITY_MAP = {
+      nbsp: " ",
+      amp: "&",
+      lt: "<",
+      gt: ">",
+      quot: '"',
+      apos: "'",
+      rsquo: "\u2019",
+      lsquo: "\u2018",
+      rdquo: "\u201D",
+      ldquo: "\u201C",
+      ndash: "\u2013",
+      mdash: "\u2014",
+      bull: "\u2022",
+      hellip: "\u2026",
+      yacute: "- ", // Word Wingdings checkbox artifact on Do Not Call lines
+    };
+
+    function decodeEntities(str) {
+      return str
+        .replace(/&([a-zA-Z]+);/g, (m, name) => {
+          const lower = name.toLowerCase();
+          return lower in ENTITY_MAP ? ENTITY_MAP[lower] : m;
+        })
+        .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    }
+
+    function normalizeText(text) {
+      const lines = text
+        .replace(/\u00a0/g, " ")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n")
+        .map((l) => l.replace(/[ \t]+/g, " ").trim());
+
+      const out = [];
+      let prevBlank = true;
+      for (const line of lines) {
+        if (line === "") {
+          if (!prevBlank) {
+            out.push("");
+            prevBlank = true;
+          }
+        } else {
+          out.push(line);
+          prevBlank = false;
+        }
+      }
+      while (out.length && out[out.length - 1] === "") out.pop();
+      return out.join("\n");
+    }
+
+    function fragmentToText(html) {
+      if (!html) return "";
+      let s = html
+        .replace(/<(style|script|colgroup)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
+        .replace(/<col\b[^>]*\/?>/gi, "")
+        .replace(/>\s*[\r\n]+\s*</g, "><")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<li\b[^>]*>/gi, "• ")
+        .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, "\n")
+        .replace(/<(hr)\b[^>]*\/?>/gi, "\n")
+        .replace(/<[^>]+>/g, "");
+      s = decodeEntities(s);
+      return normalizeText(s);
+    }
+
+    function renderTable(tableHtml) {
+      const rowMatches = [...tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)];
+      const grid = rowMatches.map((rm) => {
+        const cellMatches = [...rm[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)];
+        return cellMatches.map((cm) => fragmentToText(cm[1]));
+      });
+      if (!grid.length) return "";
+      const maxCols = Math.max(0, ...grid.map((r) => r.length));
+      const nonEmptyCells = grid.flat().filter(Boolean);
+      if (!nonEmptyCells.length) return "";
+
+      const multilineCount = nonEmptyCells.filter((c) => c.includes("\n")).length;
+      const isBlockLayout = multilineCount > nonEmptyCells.length * 0.25;
+
+      if (maxCols >= 4 && !isBlockLayout) {
+        const colBlocks = [];
+        for (let c = 0; c < maxCols; c++) {
+          const items = grid
+            .map((r) => (c < r.length && r[c] ? r[c].replace(/\n/g, " ") : ""))
+            .filter(Boolean);
+          if (items.length) colBlocks.push(items.join("\n"));
+        }
+        return colBlocks.join("\n\n");
+      }
+
+      if (isBlockLayout) {
+        return nonEmptyCells.join("\n\n");
+      }
+
+      const lines = grid.map((row) => {
+        const ne = row.map((c) => c.replace(/\n/g, " ")).filter(Boolean);
+        return ne.length ? ne.join(" - ") : "";
+      });
+      return normalizeText(lines.join("\n"));
+    }
+
+    function htmlNotesToPlainText(rawHtml) {
+      if (!rawHtml) return "";
+      if (!/<[a-z][\s\S]*>/i.test(rawHtml) && !/&[a-z#0-9]+;/i.test(rawHtml)) {
+        return normalizeText(rawHtml);
+      }
+      const segments = [];
+      const tableRe = /<table\b[^>]*>[\s\S]*?<\/table>/gi;
+      let pos = 0;
+      let m;
+      while ((m = tableRe.exec(rawHtml)) !== null) {
+        const before = rawHtml.slice(pos, m.index);
+        if (before.trim()) {
+          const t = fragmentToText(before);
+          if (t) segments.push(t);
+        }
+        const tbl = renderTable(m[0]);
+        if (tbl) segments.push(tbl);
+        pos = m.index + m[0].length;
+      }
+      const after = rawHtml.slice(pos);
+      if (after.trim()) {
+        const t = fragmentToText(after);
+        if (t) segments.push(t);
+      }
+      return normalizeText(segments.join("\n\n"));
+    }
+
+    // =========================================================================
+    // 2. Address / Location Extraction Engine
+    // =========================================================================
+    const US_STATES = new Set([
+      "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+      "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+      "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"
+    ]);
+
+    // Strict road words used to avoid mistaking a street name for a city name
+    // (excludes geographic words that occur in town names like "Oak Creek" or "Long Lane" or "Springfield")
+    const CITY_DISQUALIFIER_RE =
+      /\b(rd|road|st|street|dr|drive|ave|avenue|blvd|boulevard|ct|court|cir|circle|trl|trail|pkwy|parkway|hwy|highway|state\s+rd|state\s+road|state\s+hwy|state\s+highway|county\s+rd|county\s+road|county\s+line|us\s+hwy|us\s+highway|farm\s+rd|co\s+rd|st\s+hwy|st\s+rd)\b/i;
+
+    const STREET_SUFFIX_RE =
+      /\b(rd|road|st|street|ln|lane|dr|drive|ave|avenue|blvd|boulevard|ct|court|cir|circle|trl|trail|way|pkwy|parkway|pl|place|ter|terrace|loop|hwy|highway|rte|route|run|ridge|hollow|creek|pass|path|bend|point|pt|row|sq|square|pike|spur|alley|xing|crossing)\.?$/i;
+
+    const STREET_KEYWORD_RE =
+      /\b(rd|road|st|street|ln|lane|dr|drive|ave|avenue|blvd|ct|court|cir|circle|trl|trail|way|pkwy|pl|place|loop|hwy|highway|state\s+rd|state\s+road|state\s+hwy|state\s+highway|county\s+rd|county\s+road|county\s+line|us\s+hwy|us\s+highway|farm\s+rd|co\s+rd|cr\s+\d+|st\s+hwy|st\s+rd|mo\s+\d+)\b/i;
+
+    function splitTerritoryNumber(rawNum) {
+      const s = String(rawNum || "").trim();
+      if (!s) return { number: "", suffix: "" };
+      let m = s.match(/^(\d+)\s*-\s*([A-Za-z0-9]+)$/);
+      if (m) return { number: m[1], suffix: m[2] };
+      m = s.match(/^([A-Za-z]+)\s*-\s*(\d+)$/);
+      if (m) return { number: m[2], suffix: m[1] };
+      m = s.match(/^(\d+)([A-Za-z]+)$/);
+      if (m) return { number: m[1], suffix: m[2] };
+      if (/^\d+$/.test(s)) return { number: s, suffix: "" };
+      return { number: s, suffix: "" };
+    }
+
+    function parseCityStateZip(text) {
+      const s = text.trim().replace(/,?\s*(?:united\s+states|usa|u\.s\.a\.?)$/i, "").replace(/\.$/, "").trim();
+      let m = s.match(/^([A-Za-z][A-Za-z .'-]{1,28}?)[,\s]+([A-Za-z]{2})\.?\s*,?\s*(\d{5}(?:-\d{4})?)$/);
+      if (m && US_STATES.has(m[2].toUpperCase()) && !CITY_DISQUALIFIER_RE.test(m[1])) {
+        return { city: m[1].replace(/[,.]+$/, "").trim(), state: m[2].toUpperCase(), zip: m[3] };
+      }
+      m = s.match(/^([A-Za-z][A-Za-z .'-]{1,28}?)[,\s]+(\d{5}(?:-\d{4})?)$/);
+      if (
+        m &&
+        !CITY_DISQUALIFIER_RE.test(m[1]) &&
+        !/^(zip|postal|code|territory|box|po|p\.o\.|address|hwy|highway|rd|road|county|state|route|us)$/i.test(m[1].trim())
+      ) {
+        return { city: m[1].replace(/[,.]+$/, "").trim(), state: "", zip: m[2] };
+      }
+      m = s.match(/^([A-Za-z][A-Za-z .'-]{1,28}?)[,\s]+([A-Za-z]{2})\.?$/);
+      if (m && US_STATES.has(m[2].toUpperCase()) && !/\d/.test(m[1]) && !CITY_DISQUALIFIER_RE.test(m[1])) {
+        return { city: m[1].replace(/[,.]+$/, "").trim(), state: m[2].toUpperCase(), zip: "" };
+      }
+      m = s.match(/^([A-Za-z]{2})\.?\s*,?\s*(\d{5}(?:-\d{4})?)$/);
+      if (m && US_STATES.has(m[1].toUpperCase())) {
+        return { city: "", state: m[1].toUpperCase(), zip: m[2] };
+      }
+      return null;
+    }
+
+    function extractTrailingCityStateZip(text) {
+      let s = text.trim().replace(/,?\s*(?:united\s+states|usa|u\.s\.a\.?)$/i, "").trim();
+      const patterns = [
+        /(?:\s*[-–—]\s*|,\s*)([A-Za-z][A-Za-z .'-]{1,25}?)[,\s]+([A-Za-z]{2})\.?\s*,?\s*(\d{5}(?:-\d{4})?)$/,
+        /\s+([A-Z][a-z.'-]+(?:\s+[A-Z][a-z.'-]+)?),\s*([A-Za-z]{2})\.?\s*,?\s*(\d{5}(?:-\d{4})?)$/,
+        /\s+([A-Z][a-z.'-]+(?:\s+[A-Z][a-z.'-]+)?),\s*([A-Za-z]{2})\.?$/,
+        /(?:\s*[-–—]\s*|,\s*)([A-Za-z][A-Za-z .'-]{1,25}?)[,\s]+([A-Za-z]{2})\.?$/,
+        /(?:\s*[-–—]\s*|,\s*)([A-Za-z][A-Za-z .'-]{1,25}?)[,\s]+(\d{5}(?:-\d{4})?)$/,
+      ];
+      for (let i = 0; i < patterns.length; i++) {
+        const m = s.match(patterns[i]);
+        if (!m) continue;
+        const cityCand = m[1].replace(/[,.]+$/, "").trim();
+        if (CITY_DISQUALIFIER_RE.test(cityCand)) continue;
+        if (i === 0 || i === 1) {
+          if (US_STATES.has(m[2].toUpperCase())) {
+            return {
+              rest: s.slice(0, m.index).replace(/[,\s-]+$/, "").trim(),
+              city: cityCand,
+              state: m[2].toUpperCase(),
+              zip: m[3],
+            };
+          }
+        } else if (i === 2 || i === 3) {
+          if (US_STATES.has(m[2].toUpperCase())) {
+            return {
+              rest: s.slice(0, m.index).replace(/[,\s-]+$/, "").trim(),
+              city: cityCand,
+              state: m[2].toUpperCase(),
+              zip: "",
+            };
+          }
+        } else if (i === 4) {
+          return {
+            rest: s.slice(0, m.index).replace(/[,\s-]+$/, "").trim(),
+            city: cityCand,
+            state: "",
+            zip: m[2],
+          };
+        }
+      }
+      return null;
+    }
+
+    function isMetadataOrInstruction(line) {
+      const l = line.trim();
+      if (!l) return true;
+      if (/^[-_=*•o.]{1,}$/i.test(l)) return true;
+      if (/^[-–—]{3,}.*[-–—]{3,}$/.test(l)) return true;
+      if (/^#\d+$/.test(l)) return true;
+      if (/^(last\s+updated|updated|territory\s*(number|#|no\.?)?|category\s+[a-z]\s*-|hickory\s+territory|hickory\s+county|rural\s+territory|town\s+territory|letter\s+writing|phone\s+\d|[a-z]{1,2}-\d+|rural\s*#?\s*\d+|town\s*#?\s*\d+)/i.test(l)) {
+        return true;
+      }
+      if (/^(please\s+|note:|notes:|labelled\s+in|labeled\s+in|north\s+\d+\s+block|east\s+\d+\s+block|south\s+\d+\s+block|west\s+\d+\s+block|no\s+address|no\s+houses|addresses\s+for|letter\s+writing\s+addresses|road\s+name\s*-\s*township|po\s+boxes|unit\s+number\s*-\s*hall|number\s*-\s*name|\d{3}\s+prefix|all\s+addresses|all\s+[a-z]+\s+addresses|\d{5}\s+zip\s+code|the\s+entire\s+)/i.test(l)) {
+        return true;
+      }
+      if (/^(do\s+not\s+work|only\s+work|work\s+(both|the|up\s+to|to\s+)|-work\s+to|\*+start\s+at|verify\s+all)/i.test(l)) return true;
+      if (/no\s+(houses|addresses)\s+(in|on)/i.test(l)) return true;
+      const words = l.split(/\s+/);
+      if (words.length >= 10 && !/^\d+/.test(l) && !/^(o|•|-)\s+\d+/.test(l)) return true;
+      return false;
+    }
+
+    function splitUnitFromStreet(street) {
+      let apt = "";
+      let s = street.trim();
+      const m = s.match(/(?:,?\s+(?:apt\.?|apartment|unit|lot|suite|ste\.?|trlr\.?|trailer|bldg\.?|rm\.?)\s*#?\s*([A-Za-z0-9-]+)|,?\s+#\s*([A-Za-z0-9-]+))$/i);
+      if (m) {
+        apt = (m[1] || m[2] || "").trim();
+        s = s.slice(0, m.index).replace(/[,\s]+$/, "").trim();
+      }
+      return { street: s, apt };
+    }
+
+    function normalizeStreetKey(street) {
+      return street
+        .toLowerCase()
+        .replace(/\./g, "")
+        .replace(/\broad\b/g, "rd")
+        .replace(/\bstreet\b/g, "st")
+        .replace(/\blane\b/g, "ln")
+        .replace(/\bdrive\b/g, "dr")
+        .replace(/\bhighway\b/g, "hwy")
+        .replace(/\btrail\b/g, "trl")
+        .replace(/\bstate\s+hwy\b/g, "st hwy")
+        .replace(/\bstate\s+rd\b/g, "st rd")
+        .replace(/\bcounty\s+rd\b/g, "co rd")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function parseFullAddressLine(rawLine) {
+      let line = rawLine.trim();
+      let isDnc = false;
+      let name = "";
+      let note = "";
+
+      line = line.replace(/^[o•*-]\s+/i, "").trim();
+
+      if (/^(do\s+not\s+call|dnc)\b[:\s-]*/i.test(line)) {
+        isDnc = true;
+        line = line.replace(/^(do\s+not\s+call|dnc)\b[:\s-]*/i, "").trim();
+      }
+
+      if (/[\s,(-]+(?:\*?dnc|do\s+not\s+call(?:\s+or\s+write)?)\)?\.?[-–—\s]*$/i.test(line)) {
+        isDnc = true;
+        line = line.replace(/[\s,(-]+(?:\*?dnc|do\s+not\s+call(?:\s+or\s+write)?)\)?\.?[-–—\s]*$/i, "").trim();
+      }
+
+      let mTrailParen = line.match(/\s*\(([^)]+)\)\s*$/);
+      if (mTrailParen) {
+        const pText = mTrailParen[1].trim();
+        if (/\b(dnc|do\s+not\s+call)\b/i.test(pText)) isDnc = true;
+        else note = note ? `${note}; ${pText}` : pText;
+        line = line.slice(0, mTrailParen.index).trim();
+      }
+
+      let mLeadNote = line.match(/^\(([^)]+)\)\s*[-–—:]?\s*(.+)$/);
+      if (mLeadNote) {
+        note = note ? `${note}; ${mLeadNote[1].trim()}` : mLeadNote[1].trim();
+        line = mLeadNote[2].trim();
+      }
+
+      let mLeadName = line.match(/^([A-Za-z][A-Za-z .,'&]{1,35}?)(?:\s+[-–—]\s+|,\s+)(\d+[A-Za-z]?\s+.+)$/);
+      if (mLeadName) {
+        const left = mLeadName[1].trim();
+        if (/\b(house|trailer|cabin|mobile|driveway|white|red|blue|green|yellow|brown|gray|grey|brick|end\s+of)\b/i.test(left)) {
+          note = note ? `${note}; ${left}` : left;
+        } else {
+          name = left;
+        }
+        line = mLeadName[2].trim();
+      }
+
+      let city = "", state = "", zip = "";
+      const trailingCsz = extractTrailingCityStateZip(line);
+      if (trailingCsz) {
+        line = trailingCsz.rest;
+        city = trailingCsz.city;
+        state = trailingCsz.state;
+        zip = trailingCsz.zip;
+      } else {
+        const dashParts = line.match(/^(\d+[A-Za-z]?\s+[^–—-]+?)(?:\s+-\s+|\s*[–—]\s*)(.+)$/);
+        if (dashParts) {
+          const right = dashParts[2].trim();
+          const csz = parseCityStateZip(right);
+          if (csz) {
+            city = csz.city;
+            state = csz.state;
+            zip = csz.zip;
+          } else if (/^[A-Za-z][A-Za-z .'-]{2,20}$/.test(right) && !/\b(house|driveway|mailbox|call|creek|past|side|verified|usps|only|near|corner|next|trespassing|sign|door)\b/i.test(right)) {
+            city = right;
+          } else {
+            note = note ? `${note}; ${right}` : right;
+          }
+          line = dashParts[1].trim();
+        } else {
+          const commaCity = line.match(/^(\d+[A-Za-z]?\s+[^,]+?),\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/);
+          if (commaCity && !CITY_DISQUALIFIER_RE.test(commaCity[2])) {
+            line = commaCity[1].trim();
+            city = commaCity[2].trim();
+          }
+        }
+      }
+
+      const uspsMatch = line.match(/\s+(not\s+(?:verified\s+)?on\s+usps.*)$/i);
+      if (uspsMatch) {
+        note = note ? `${note}; ${uspsMatch[1].trim()}` : uspsMatch[1].trim();
+        line = line.slice(0, uspsMatch.index).trim();
+      }
+
+      line = line.replace(/[,\s-]+$/, "").trim();
+
+      if (/^\d{3}[-.]\d{3}[-.]\d{4}/.test(line)) return null;
+      if (/^\d+\/\d+/.test(line)) return null;
+      if (/^\d+\s+block\b/i.test(line)) return null;
+      if (/^\d{5}\s+zip\b/i.test(line)) return null;
+
+      const addrMatch = line.match(/^(\d+[A-Za-z]?)\s+([A-Za-z0-9#.,/'& -]{2,})$/);
+      if (!addrMatch) return null;
+
+      const num = addrMatch[1].trim();
+      let streetPart = addrMatch[2].replace(/[,-]+$/, "").trim();
+
+      if (/^\d+$/.test(streetPart) || /^(prefix|zip|miles?|feet|acres?|houses?|apartments?)\b/i.test(streetPart)) {
+        return null;
+      }
+
+      let apt = "";
+      const midApt = streetPart.match(/^(.+?)\s+#([A-Za-z0-9-]+)(?:,\s*(.+))?$/);
+      if (midApt) {
+        apt = midApt[2];
+        streetPart = midApt[3] ? `${midApt[1]} (${midApt[3]})` : midApt[1];
+      } else {
+        const split = splitUnitFromStreet(streetPart);
+        streetPart = split.street;
+        apt = split.apt;
+      }
+
+      const trailingSingleWordCity = streetPart.match(/^(.+?\b(?:st|street|rd|road|ln|lane|dr|drive|ave|blvd|ct|cir|trl|trail|way|hwy|highway|loop)\.?)\s+([A-Z][a-z]{2,15})$/);
+      if (trailingSingleWordCity && !city && !/^(north|south|east|west|ext|extension|loop|spur|business|bypass|old|new)$/i.test(trailingSingleWordCity[2])) {
+        streetPart = trailingSingleWordCity[1].trim();
+        city = trailingSingleWordCity[2].trim();
+      }
+
+      streetPart = streetPart.replace(/\s+/g, " ").trim();
+      if (!streetPart) return null;
+
+      return { num, street: streetPart, apt, city, state, zip, isDnc, name, note };
+    }
+
+    function parseStreetHeader(line) {
+      let s = line.trim();
+      if (!s || isMetadataOrInstruction(s)) return null;
+      if (/^po\s+box\b/i.test(s)) return null;
+      if (/^\d[\d,\s-]*$/.test(s)) return null;
+      if (/^(o|•|-)\s+\d+/i.test(s)) return null;
+      if (/^address\s*:/i.test(s)) return null;
+      if (/^\d+\s+/.test(s) && !/^\d+(?:st|nd|rd|th)\b/i.test(s)) return null;
+
+      let city = "", state = "", zip = "", note = "";
+      s = s.replace(/\s*[-–—]\s*township\s*\/\s*zip\s*code$/i, "").trim();
+
+      const trailing = extractTrailingCityStateZip(s);
+      if (trailing) {
+        s = trailing.rest;
+        city = trailing.city;
+        state = trailing.state;
+        zip = trailing.zip;
+      }
+
+      const paren = s.match(/\s*\(([^)]+)\)\s*$/);
+      if (paren) {
+        note = paren[1].trim();
+        s = s.slice(0, paren.index).trim();
+      }
+      const sideNote = s.match(/\s+((?:right|left|north|south|east|west)\s+side.*|(?:evens?|odds?)\s+(?:numbers?\s+)?only.*)$/i);
+      if (sideNote) {
+        note = note ? `${note}; ${sideNote[1].trim()}` : sideNote[1].trim();
+        s = s.slice(0, sideNote.index).trim();
+      }
+
+      s = s.replace(/[:\-–—]+$/, "").trim();
+      if (!s || s.length > 48) return null;
+
+      const looksLikeStreet =
+        STREET_KEYWORD_RE.test(s) ||
+        STREET_SUFFIX_RE.test(s) ||
+        /^(n|s|e|w|ne|nw|se|sw)\.?\s+[A-Z]/i.test(s) ||
+        /^\d+(?:st|nd|rd|th)\s+(rd|road|st|street|ave)/i.test(s);
+
+      return { street: s, city, state, zip, note, strong: looksLikeStreet };
+    }
+
+    function extractTerritoryLocations(feature, options = {}) {
+      const {
+        defaultState = "",
+        defaultCity = "",
+        defaultType = "House",
+        dncMode = "include", // "include" | "exclude" | "only"
+        includePhone = false,
+        includePoBox = true,
+        deduplicate = true,
+        splitSuffix = true,
+      } = options;
+
+      const props = feature.properties || {};
+      const category = props.TerritoryType || "";
+      const categoryCode = (props.TerritoryTypeCode || (category ? category[0] : "") || "").toUpperCase();
+      const rawNum = props.TerritoryNumber || "";
+      const terrName = props.name || `${category} ${rawNum}`.trim();
+      const { number: terrNum, suffix: terrSuffix } = splitSuffix
+        ? splitTerritoryNumber(rawNum)
+        : { number: String(rawNum), suffix: "" };
+
+      const rawText = props.TerritoryNotes || props.description || "";
+      const plainText = htmlNotesToPlainText(rawText);
+      if (!plainText) return { records: [], flagged: [] };
+
+      const lines = plainText.split("\n");
+      const isPhoneTerritory =
+        /phone/i.test(category) ||
+        lines.filter((l) => /\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/.test(l)).length >= 5;
+
+      if (isPhoneTerritory && !includePhone) {
+        return { records: [], flagged: [] };
+      }
+
+      const records = [];
+      const flagged = [];
+
+      const allowStatus = (status) => {
+        if (dncMode === "exclude" && status === "DNC") return false;
+        if (dncMode === "only" && status !== "DNC") return false;
+        return true;
+      };
+
+      if (isPhoneTerritory) {
+        for (const line of lines) {
+          const m = line.match(/^[•o*-]?\s*(\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4})\s*[-–—]?\s*(.*)$/);
+          if (m) {
+            const phone = m[1].trim();
+            let rest = m[2].trim();
+            const isDnc = /\b(dnc|do\s+not\s+call)\b/i.test(rest);
+            const status = isDnc ? "DNC" : "Available";
+            if (!allowStatus(status)) continue;
+            rest = rest.replace(/\b(dnc|do\s+not\s+call)\b/gi, "").replace(/[-–—\s]+$/, "").trim();
+            records.push({
+              Category: category,
+              CategoryCode: categoryCode,
+              TerritoryNumber: terrNum,
+              Suffix: terrSuffix,
+              Type: "Other",
+              Status: status,
+              Number: "",
+              Street: "",
+              ApartmentNumber: "",
+              City: defaultCity,
+              State: defaultState,
+              PostalCode: "",
+              Name: rest,
+              Phone: phone,
+              Notes: "",
+              Latitude: "",
+              Longitude: "",
+              _rawTerritoryNumber: String(rawNum),
+              _territoryName: terrName,
+            });
+          }
+        }
+        return { records, flagged };
+      }
+
+      if (lines.some((l) => /^unit\s+number\s*-\s*hall\s*-\s*name$/i.test(l.trim()))) {
+        for (const line of lines) {
+          const m = line.match(/^([0-9]+[a-zA-Z]?)\s*-\s*([^-]+?)\s*-\s*(.+)$/);
+          if (m && allowStatus("Available")) {
+            records.push({
+              Category: category,
+              CategoryCode: categoryCode,
+              TerritoryNumber: terrNum,
+              Suffix: terrSuffix,
+              Type: "Apartment",
+              Status: "Available",
+              Number: "",
+              Street: category || terrName,
+              ApartmentNumber: m[1].trim(),
+              City: defaultCity,
+              State: defaultState,
+              PostalCode: "",
+              Name: m[3].trim(),
+              Phone: "",
+              Notes: m[2].trim(),
+              Latitude: "",
+              Longitude: "",
+              _rawTerritoryNumber: String(rawNum),
+              _territoryName: terrName,
+            });
+          }
+        }
+        return { records, flagged };
+      }
+
+      let terrCity = defaultCity;
+      let terrState = defaultState;
+      let terrZip = "";
+      const skipLineIdx = new Set();
+
+      const descLabel = (props.description || "").split("\n")[0] || "";
+      const labelCityMatch = descLabel.match(/#\d+\s*[-–—]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/);
+      if (labelCityMatch) terrCity = labelCityMatch[1].trim();
+
+      for (let i = 0; i < lines.length; i++) {
+        const l = lines[i].trim();
+        let m = l.match(/^all\s+addresses\s+are\s+(?:in\s+)?(.+?)(?:\s+unless\b.*)?$/i);
+        if (m) {
+          const csz = parseCityStateZip(m[1].trim());
+          if (csz) {
+            if (csz.city) terrCity = csz.city;
+            if (csz.state) terrState = csz.state;
+            if (csz.zip) terrZip = csz.zip;
+          }
+          skipLineIdx.add(i);
+          continue;
+        }
+        m = l.match(/^all\s+([A-Za-z ]{2,25}?)\s+addresses$/i);
+        if (m) {
+          terrCity = m[1].trim();
+          skipLineIdx.add(i);
+          continue;
+        }
+        m = l.match(/^(\d{5})\s+zip\s*code$/i);
+        if (m) {
+          terrZip = m[1];
+          skipLineIdx.add(i);
+          continue;
+        }
+        if (/^sample\s+address\b/i.test(l)) {
+          skipLineIdx.add(i);
+          for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+            const sj = lines[j].trim();
+            if (!sj) break;
+            const csz = parseCityStateZip(sj);
+            skipLineIdx.add(j);
+            if (csz) {
+              if (csz.city && (!terrCity || terrCity === defaultCity)) terrCity = csz.city;
+              if (csz.state) terrState = csz.state;
+              if (csz.zip && !terrZip) terrZip = csz.zip;
+              break;
+            }
+          }
+          continue;
+        }
+        if (i < 6) {
+          const csz = parseCityStateZip(l);
+          if (csz && csz.zip) {
+            if (csz.city && (!terrCity || terrCity === defaultCity)) terrCity = csz.city;
+            if (csz.state) terrState = csz.state;
+            if (csz.zip && !terrZip) terrZip = csz.zip;
+            skipLineIdx.add(i);
+          }
+        }
+      }
+
+      let inDncSection = false;
+      let currentStreet = "";
+      let currentCity = "";
+      let currentState = "";
+      let currentZip = "";
+      let currentStreetNote = "";
+      let pendingName = "";
+      let lastRecordIdx = -1;
+      let justSawBlank = false;
+
+      const rawRecords = [];
+      const emitRecord = (rec) => {
+        const status = rec.isDnc ? "DNC" : "Available";
+        const obj = {
+          Category: category,
+          CategoryCode: categoryCode,
+          TerritoryNumber: terrNum,
+          Suffix: terrSuffix,
+          Type: rec.type || defaultType,
+          Status: status,
+          Number: rec.num || "",
+          Street: rec.street || "",
+          ApartmentNumber: rec.apt || "",
+          City: rec.city || currentCity || terrCity || "",
+          State: rec.state || currentState || terrState || defaultState,
+          PostalCode: rec.zip || currentZip || terrZip || "",
+          Name: rec.name || "",
+          Phone: rec.phone || "",
+          Notes: rec.note || "",
+          Latitude: "",
+          Longitude: "",
+          _rawTerritoryNumber: String(rawNum),
+          _territoryName: terrName,
+        };
+        rawRecords.push(obj);
+        lastRecordIdx = rawRecords.length - 1;
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        if (skipLineIdx.has(i)) continue;
+        const line = lines[i].trim();
+
+        if (!line) {
+          justSawBlank = true;
+          pendingName = "";
+          continue;
+        }
+
+        if (/^(do\s+not\s+call(\s+list)?|dnc(\s+list)?)\s*:?$/i.test(line)) {
+          inDncSection = true;
+          currentStreet = "";
+          pendingName = "";
+          lastRecordIdx = -1;
+          justSawBlank = false;
+          continue;
+        }
+
+        if (inDncSection && justSawBlank) {
+          if (isMetadataOrInstruction(line) || /^address\s*:/i.test(line) || /^po\s+box\b/i.test(line)) {
+            inDncSection = false;
+          } else {
+            const hdr = parseStreetHeader(line);
+            if (hdr && hdr.strong) {
+              inDncSection = false;
+            } else {
+              const next = (lines[i + 1] || "").trim();
+              if (/^(address\s*:|\d+[\d,\s]*$|o\s+\d+|•\s+\d+)/i.test(next) || parseCityStateZip(next)) {
+                inDncSection = false;
+              }
+            }
+          }
+        }
+
+        const wasBlank = justSawBlank;
+        justSawBlank = false;
+
+        if (isMetadataOrInstruction(line)) {
+          if (/^(territory|updated|last\s+updated|----|category\s+[a-z]\s*-)/i.test(line)) {
+            inDncSection = false;
+            currentStreet = "";
+            currentCity = "";
+            currentState = "";
+            currentZip = "";
+          }
+          pendingName = "";
+          continue;
+        }
+
+        // 0. Standalone phone line directly beneath an address
+        const phoneOnly = line.match(/^(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]\d{4})$/);
+        if (phoneOnly && lastRecordIdx >= 0) {
+          const prev = rawRecords[lastRecordIdx];
+          prev.Phone = prev.Phone ? `${prev.Phone}, ${phoneOnly[1]}` : phoneOnly[1];
+          pendingName = "";
+          continue;
+        }
+
+        // 1. Standalone City / State / Zip line
+        const csz = parseCityStateZip(line);
+        if (csz) {
+          if (!wasBlank && lastRecordIdx >= 0) {
+            const prev = rawRecords[lastRecordIdx];
+            if (csz.city && (!prev.City || prev.City === terrCity)) prev.City = csz.city;
+            if (csz.state) prev.State = csz.state;
+            if (csz.zip) prev.PostalCode = csz.zip;
+          } else if (currentStreet) {
+            if (csz.city) currentCity = csz.city;
+            if (csz.state) currentState = csz.state;
+            if (csz.zip) currentZip = csz.zip;
+          }
+          pendingName = "";
+          continue;
+        }
+
+        // 2. PO Box line
+        const poMatch = line.match(/^(?:p\.?\s*o\.?\s*box)\s+(\d+[A-Za-z]?)(?:\s*[,]?\s*(.*))?$/i);
+        if (poMatch) {
+          if (includePoBox) {
+            let city = "", state = "", zip = "";
+            if (poMatch[2] && poMatch[2].trim()) {
+              const pc = parseCityStateZip(poMatch[2].trim());
+              if (pc) { city = pc.city; state = pc.state; zip = pc.zip; }
+            }
+            emitRecord({
+              type: "Other",
+              num: poMatch[1].trim(),
+              street: "PO Box",
+              city,
+              state,
+              zip,
+              isDnc: inDncSection,
+              name: pendingName,
+            });
+          }
+          pendingName = "";
+          continue;
+        }
+
+        // 3. "Address: 28775" or "Address: 163--note"
+        const addrPrefixMatch = line.match(/^address\s*:\s*(.+)$/i);
+        if (addrPrefixMatch && currentStreet) {
+          const val = addrPrefixMatch[1].trim();
+          const singleWithNote = val.match(/^(\d+[A-Za-z]?)\s*[-–—]+\s*(.+)$/);
+          if (singleWithNote) {
+            const right = singleWithNote[2].trim();
+            emitRecord({
+              num: singleWithNote[1].trim(),
+              street: currentStreet,
+              isDnc: inDncSection || /\b(dnc|do\s+not\s+call)\b/i.test(right),
+              note: [currentStreetNote, right].filter(Boolean).join("; "),
+            });
+            pendingName = "";
+            continue;
+          }
+          const nums = val.split(/[,\s]+/).map((x) => x.trim()).filter((x) => /^\d+[A-Za-z]?$/.test(x));
+          if (nums.length) {
+            for (const n of nums) {
+              emitRecord({ num: n, street: currentStreet, isDnc: inDncSection, note: currentStreetNote });
+            }
+            pendingName = "";
+            continue;
+          }
+        }
+
+        // 4. Table row or inline city/DNC under currentStreet:
+        //    "5 - Tunas, MO 65764" | "783 - Not verified on USPS" | "566 Phillipsburg, MO 65722" | "332 Do Not Call"
+        if (currentStreet) {
+          const numDnc = line.match(/^(\d+[A-Za-z]?)\s+(?:do\s+not\s+call|dnc)\b(.*)$/i);
+          if (numDnc) {
+            emitRecord({
+              num: numDnc[1].trim(),
+              street: currentStreet,
+              isDnc: true,
+              note: [currentStreetNote, numDnc[2].replace(/^[\s:-]+/, "").trim()].filter(Boolean).join("; "),
+            });
+            pendingName = "";
+            continue;
+          }
+
+          const numSpaceCsz = line.match(/^(\d+[A-Za-z]?)\s+(.+)$/);
+          if (numSpaceCsz) {
+            const cszRight = parseCityStateZip(numSpaceCsz[2]);
+            if (cszRight) {
+              emitRecord({
+                num: numSpaceCsz[1].trim(),
+                street: currentStreet,
+                city: cszRight.city,
+                state: cszRight.state,
+                zip: cszRight.zip,
+                isDnc: inDncSection,
+                note: currentStreetNote,
+              });
+              pendingName = "";
+              continue;
+            }
+          }
+
+          const rowMatch = line.match(/^(\d+[A-Za-z]?)\s*[-–—]\s*(.+)$/);
+          if (rowMatch) {
+            const right = rowMatch[2].trim();
+            const rCsz = parseCityStateZip(right);
+            const rDnc = inDncSection || /\b(dnc|do\s+not\s+call)\b/i.test(right);
+            if (rCsz) {
+              emitRecord({
+                num: rowMatch[1].trim(),
+                street: currentStreet,
+                city: rCsz.city,
+                state: rCsz.state,
+                zip: rCsz.zip,
+                isDnc: rDnc,
+                note: currentStreetNote,
+              });
+            } else {
+              emitRecord({
+                num: rowMatch[1].trim(),
+                street: currentStreet,
+                isDnc: rDnc,
+                note: [currentStreetNote, right].filter(Boolean).join("; "),
+              });
+            }
+            pendingName = "";
+            continue;
+          }
+        }
+
+        // 5. Comma-separated or single house numbers under currentStreet
+        if (currentStreet && /^[\dA-Za-z,\s]+$/.test(line) && /\d/.test(line)) {
+          const tokens = line.split(/[,\s]+/).map((t) => t.trim()).filter(Boolean);
+          if (tokens.length > 0 && tokens.every((t) => /^\d{1,5}[A-Za-z]?$/.test(t))) {
+            for (const n of tokens) {
+              emitRecord({ num: n, street: currentStreet, isDnc: inDncSection, note: currentStreetNote });
+            }
+            pendingName = "";
+            continue;
+          }
+        }
+
+        // 6. Full address line
+        const full = parseFullAddressLine(line);
+        if (full) {
+          emitRecord({
+            num: full.num,
+            street: full.street,
+            apt: full.apt,
+            city: full.city,
+            state: full.state,
+            zip: full.zip,
+            isDnc: inDncSection || full.isDnc,
+            name: full.name || pendingName,
+            note: full.note || currentStreetNote,
+          });
+          pendingName = "";
+          continue;
+        }
+
+        // 7. Street header vs resident name
+        const hdr = parseStreetHeader(line);
+        let nextNonEmpty = "";
+        for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+          if (lines[j].trim()) { nextNonEmpty = lines[j].trim(); break; }
+        }
+
+        const nextIsNumberListOrAddressPrefix =
+          /^address\s*:/i.test(nextNonEmpty) ||
+          /^\d{1,5}[A-Za-z]?(\s*,\s*\d{1,5}[A-Za-z]?)*,?\s*$/.test(nextNonEmpty) ||
+          /^\d+[A-Za-z]?\s*[-–—]\s*/.test(nextNonEmpty) ||
+          /^[-–—]{3,}$/.test(nextNonEmpty) ||
+          Boolean(parseCityStateZip(nextNonEmpty));
+
+        const nextIsBulletedOrFullOnSameWord =
+          hdr &&
+          new RegExp(`^[o•*-]?\\s*\\d+\\s+.*${hdr.street.split(" ")[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i").test(nextNonEmpty);
+
+        if (hdr && (hdr.strong || nextIsNumberListOrAddressPrefix || nextIsBulletedOrFullOnSameWord)) {
+          currentStreet = hdr.street;
+          currentCity = hdr.city || "";
+          currentState = hdr.state || "";
+          currentZip = hdr.zip || "";
+          currentStreetNote = hdr.note || "";
+          pendingName = "";
+          lastRecordIdx = -1;
+          continue;
+        }
+
+        const nextLineImmediate = (lines[i + 1] || "").trim();
+        const nextIsAddrOrPo =
+          /^p\.?\s*o\.?\s*box\b/i.test(nextLineImmediate) ||
+          Boolean(parseFullAddressLine(nextLineImmediate));
+        if (nextIsAddrOrPo && !/\d/.test(line) && line.length <= 45) {
+          pendingName = /^(current\s+resident|our\s+neighbor|neighbor|resident|occupant)$/i.test(line)
+            ? ""
+            : line;
+          continue;
+        }
+
+        if (line.length > 2) {
+          flagged.push({ territory: terrName, line });
+        }
+        pendingName = "";
+      }
+
+      // Deduplicate first (so DNC status merges even before dncMode filtering!)
+      let finalRecords = rawRecords;
+      if (deduplicate) {
+        const map = new Map();
+        const deduped = [];
+        for (const r of rawRecords) {
+          const key = `${r.Number.toLowerCase()}|${normalizeStreetKey(r.Street)}|${r.ApartmentNumber.toLowerCase()}`;
+          if (!r.Number && !r.Street) {
+            deduped.push(r);
+            continue;
+          }
+          if (map.has(key)) {
+            const existing = map.get(key);
+            if (r.Status === "DNC") existing.Status = "DNC";
+            if (!existing.City && r.City) existing.City = r.City;
+            if (!existing.State && r.State) existing.State = r.State;
+            if (!existing.PostalCode && r.PostalCode) existing.PostalCode = r.PostalCode;
+            if (!existing.Name && r.Name) existing.Name = r.Name;
+            if (!existing.Phone && r.Phone) existing.Phone = r.Phone;
+            if (r.Notes && !existing.Notes.includes(r.Notes)) {
+              existing.Notes = existing.Notes ? `${existing.Notes}; ${r.Notes}` : r.Notes;
+            }
+          } else {
+            map.set(key, r);
+            deduped.push(r);
+          }
+        }
+        finalRecords = deduped;
+      }
+
+      // Now apply dncMode filter (after DNC merging, so excluded DNCs never leak as Available!)
+      finalRecords = finalRecords.filter((r) => allowStatus(r.Status));
+      return { records: finalRecords, flagged };
+    }
+
+    // =========================================================================
+    // 2.5 Territory Setup & Naming Normalizer (Tab 1 -> feeds Tab 2 & Tab 3)
+    // =========================================================================
+    function suggestCategoryCode(catName, usedCodes) {
+      const s = (catName || "").trim();
+      if (!s) return "T";
+      // Pattern like "Category R - Rural" or "Category T - Town" -> grab "R" or "T"!
+      const catLetter = s.match(/^category\s+([A-Za-z0-9]{1,3})\b/i);
+      if (catLetter) {
+        const cand = catLetter[1].toUpperCase();
+        if (!usedCodes.has(cand)) return cand;
+      }
+      // After dash: "Category - Rural" -> "R"
+      const afterDash = s.match(/[-–—]\s*([A-Za-z]+)/);
+      if (afterDash) {
+        const w = afterDash[1].toUpperCase();
+        if (!usedCodes.has(w[0])) return w[0];
+        if (w.length >= 2 && !usedCodes.has(w.slice(0, 2))) return w.slice(0, 2);
+      }
+      // First letters of words / first 1-3 letters
+      const words = s.replace(/[^A-Za-z0-9 ]+/g, " ").trim().split(/\s+/).filter(Boolean);
+      const candidates = [];
+      if (words.length >= 1) candidates.push(words[0][0].toUpperCase());
+      if (words.length >= 2) candidates.push((words[0][0] + words[1][0]).toUpperCase());
+      if (words.length >= 1 && words[0].length >= 2) candidates.push(words[0].slice(0, 2).toUpperCase());
+      if (words.length >= 1 && words[0].length >= 3) candidates.push(words[0].slice(0, 3).toUpperCase());
+      for (const c of candidates) {
+        if (c && !usedCodes.has(c)) return c;
+      }
+      let n = 1;
+      while (usedCodes.has(`${words[0]?.[0]?.toUpperCase() || "T"}${n}`)) n++;
+      return `${words[0]?.[0]?.toUpperCase() || "T"}${n}`;
+    }
+
+    function normalizeTerritoryNumberValue(rawNum, fallbackSeq) {
+      const s = String(rawNum ?? "").trim();
+      if (!s) return { formatted: String(fallbackSeq), number: String(fallbackSeq), suffix: "", changed: true, reason: "Blank number → assigned sequential number" };
+
+      // Already valid "<digits>" or "<digits>-<suffix>"
+      let m = s.match(/^(\d+)(?:-([A-Za-z0-9]+))?$/);
+      if (m) {
+        const num = String(parseInt(m[1], 10)); // strip leading zeros like "03" -> "3"
+        const suf = m[2] || "";
+        const formatted = suf ? `${num}-${suf}` : num;
+        return {
+          formatted,
+          number: num,
+          suffix: suf,
+          changed: formatted !== s,
+          reason: formatted !== s ? "Trimmed leading zeros" : "",
+        };
+      }
+
+      // Prefix-first with dash/space: "R-81", "H 3", "North-5", "T-04"
+      m = s.match(/^([A-Za-z]+)\s*[-_\s]\s*(\d+)([A-Za-z]?)$/);
+      if (m) {
+        const num = String(parseInt(m[2], 10));
+        const suf = (m[1].length <= 3 ? m[1] : m[1][0]).toUpperCase() + (m[3] ? m[3].toUpperCase() : "");
+        return {
+          formatted: `${num}-${suf}`,
+          number: num,
+          suffix: suf,
+          changed: true,
+          reason: `Prefix-first "${s}" would become Territory 0 in NWS → "${num}-${suf}"`,
+        };
+      }
+
+      // Attached prefix letters: "R81", "H3", "A12"
+      m = s.match(/^([A-Za-z]{1,3})(\d+)$/);
+      if (m) {
+        const num = String(parseInt(m[2], 10));
+        const suf = m[1].toUpperCase();
+        return {
+          formatted: `${num}-${suf}`,
+          number: num,
+          suffix: suf,
+          changed: true,
+          reason: `Letter-first "${s}" would become Territory 0 in NWS → "${num}-${suf}"`,
+        };
+      }
+
+      // Attached trailing suffix letters: "12A", "3H"
+      m = s.match(/^(\d+)\s*([A-Za-z]{1,4})$/);
+      if (m) {
+        const num = String(parseInt(m[1], 10));
+        const suf = m[2].toUpperCase();
+        return {
+          formatted: `${num}-${suf}`,
+          number: num,
+          suffix: suf,
+          changed: true,
+          reason: `Added dash separator "${s}" → "${num}-${suf}"`,
+        };
+      }
+
+      // Any string containing digits (e.g. "Downtown #4 West")
+      const anyDigits = s.match(/(\d+)/);
+      if (anyDigits) {
+        const num = String(parseInt(anyDigits[1], 10));
+        const letters = s.replace(/\d+/g, "").replace(/[^A-Za-z]+/g, "").slice(0, 3).toUpperCase();
+        const formatted = letters ? `${num}-${letters}` : num;
+        return {
+          formatted,
+          number: num,
+          suffix: letters,
+          changed: true,
+          reason: `Non-numeric "${s}" → "${formatted}"`,
+        };
+      }
+
+      // Purely text (no digits at all, e.g. "Downtown") -> fallback sequential number + initials suffix
+      const initials = s.replace(/[^A-Za-z ]+/g, "").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+      const formatted = initials ? `${fallbackSeq}-${initials}` : String(fallbackSeq);
+      return {
+        formatted,
+        number: String(fallbackSeq),
+        suffix: initials,
+        changed: true,
+        reason: `Text-only "${s}" (no digits) → "${formatted}"`,
+      };
+    }
+
+    function applyTerritorySetupFixes(sourceData, setupOpts = {}) {
+      const {
+        normalizeNumbers = true,
+        fixDuplicates = true,
+        appendCategorySuffix = false,
+        syncLabel = true,
+        categoryOverrides = {}, // { origCat: { name, code } }
+      } = setupOpts;
+
+      const cloned = JSON.parse(JSON.stringify(sourceData));
+      const changes = [];
+      const audit = {
+        total: 0,
+        categories: 0,
+        nonStandardFixed: 0,
+        duplicatesFixed: 0,
+        sharedCodeCategories: 0,
+      };
+
+      const seqByCat = {};
+      const seenKeys = new Map(); // `${cat}|${formatted}` -> count
+
+      for (const f of cloned.features || []) {
+        audit.total++;
+        const p = f.properties;
+        if (!p || typeof p !== "object") continue;
+
+        const origCat = (p.TerritoryType || "Uncategorized").trim();
+        const origCode = p.TerritoryTypeCode || "";
+        const origNum = String(p.TerritoryNumber ?? "").trim();
+        const origName = p.name || `${origCat} ${origNum}`.trim();
+
+        const override = categoryOverrides[origCat] || {};
+        const newCat = (override.name != null && override.name.trim() !== "") ? override.name.trim() : origCat;
+        const newCode = override.code !== undefined ? override.code.trim().toUpperCase() : origCode;
+
+        seqByCat[newCat] = (seqByCat[newCat] || 0) + 1;
+
+        let numRes;
+        if (normalizeNumbers) {
+          numRes = normalizeTerritoryNumberValue(origNum, seqByCat[newCat]);
+        } else {
+          const sp = splitTerritoryNumber(origNum);
+          numRes = { formatted: origNum, number: sp.number, suffix: sp.suffix, changed: false, reason: "" };
+        }
+
+        let finalNum = numRes.formatted;
+        let finalReasons = [];
+        if (numRes.changed && numRes.reason) {
+          audit.nonStandardFixed++;
+          finalReasons.push(numRes.reason);
+        }
+
+        if (appendCategorySuffix && numRes.number && !numRes.suffix) {
+          const sufCode = newCode || (newCat ? newCat[0].toUpperCase() : "");
+          if (sufCode) {
+            finalNum = `${numRes.number}-${sufCode}`;
+            finalReasons.push(`Added category suffix "${sufCode}"`);
+          }
+        }
+
+        if (newCat !== origCat) {
+          finalReasons.push(`Category renamed: "${origCat}" → "${newCat}"`);
+        }
+        if ((newCode || "") !== (origCode || "")) {
+          finalReasons.push(`CategoryCode set to "${newCode || "(blank)"}"`);
+        }
+
+        // Duplicate check inside same category
+        const key = `${newCat.toLowerCase()}|${finalNum.toLowerCase()}`;
+        if (seenKeys.has(key)) {
+          const dupIdx = seenKeys.get(key) + 1;
+          seenKeys.set(key, dupIdx);
+          if (fixDuplicates) {
+            const letter = String.fromCharCode(64 + Math.min(dupIdx, 26)); // B, C, D...
+            const sp = splitTerritoryNumber(finalNum);
+            const dedupNum = sp.suffix ? `${sp.number}-${sp.suffix}${letter}` : `${sp.number || finalNum}-${letter}`;
+            finalReasons.push(`Duplicate "${finalNum}" in "${newCat}" → "${dedupNum}" (prevents NWS overwrite)`);
+            finalNum = dedupNum;
+            audit.duplicatesFixed++;
+          } else {
+            finalReasons.push(`WARNING: Duplicate "${finalNum}" in "${newCat}" will overwrite in NWS!`);
+          }
+        } else {
+          seenKeys.set(key, 1);
+        }
+
+        p.TerritoryType = newCat;
+        p.TerritoryTypeCode = newCode ? newCode : null;
+        p.TerritoryNumber = finalNum;
+        if (syncLabel) {
+          p.name = `${newCat} ${finalNum}`.trim();
+        }
+
+        if (finalReasons.length) {
+          changes.push({
+            before: `${origCat} | ${origNum || "(blank)"}`,
+            after: `${newCat}${newCode ? ` [${newCode}]` : ""} | ${finalNum}`,
+            reason: finalReasons.join("; "),
+          });
+        }
+      }
+
+      // Audit effective category codes across all categories
+      const catCodeCounts = {};
+      const finalCats = new Map();
+      for (const f of cloned.features || []) {
+        const p = f.properties || {};
+        const cat = p.TerritoryType || "Uncategorized";
+        if (!finalCats.has(cat)) {
+          const effCode = (p.TerritoryTypeCode || (cat ? cat[0] : "") || "").toUpperCase();
+          finalCats.set(cat, effCode);
+          catCodeCounts[effCode] = (catCodeCounts[effCode] || 0) + 1;
+        }
+      }
+      audit.categories = finalCats.size;
+      audit.sharedCodeCategories = [...finalCats.values()].filter((c) => (catCodeCounts[c] || 0) > 1).length;
+
+      return { data: cloned, changes, audit };
+    }
+
+    // =========================================================================
+    // 3. GeoJSON Notes Cleaner (Tab 2)
+    // =========================================================================
+    function buildUpdatedGeoJson(sourceData, mode, cleanHtml) {
+      const cloned = JSON.parse(JSON.stringify(sourceData));
+      const stats = { total: 0, combined: 0, movedOnly: 0, keptLabel: 0, empty: 0 };
+
+      for (const f of cloned.features || []) {
+        stats.total++;
+        const p = f.properties;
+        if (!p || typeof p !== "object") continue;
+
+        const existingDesc = (p.description || "").trim();
+        const rawNotes = p.TerritoryNotes || "";
+        const processedNotes = rawNotes
+          ? (cleanHtml ? htmlNotesToPlainText(rawNotes) : rawNotes)
+          : "";
+
+        if (mode === "prepend") {
+          if (existingDesc && processedNotes) {
+            p.description = `${existingDesc}\n\n${processedNotes}`;
+            stats.combined++;
+          } else if (processedNotes) {
+            p.description = processedNotes;
+            stats.movedOnly++;
+          } else if (existingDesc) {
+            p.description = existingDesc;
+            stats.keptLabel++;
+          } else {
+            p.description = null;
+            stats.empty++;
+          }
+          p.TerritoryNotes = null;
+        } else if (mode === "replace") {
+          if (processedNotes) {
+            p.description = processedNotes;
+            stats.movedOnly++;
+          } else if (existingDesc) {
+            p.description = existingDesc;
+            stats.keptLabel++;
+          } else {
+            p.description = null;
+            stats.empty++;
+          }
+          p.TerritoryNotes = null;
+        } else if (mode === "swap") {
+          p.description = processedNotes || null;
+          p.TerritoryNotes = existingDesc || null;
+          if (processedNotes) stats.movedOnly++;
+          else stats.empty++;
+        }
+      }
+      return { data: cloned, stats };
+    }
+
+    // =========================================================================
+    // 4. CSV Generation
+    // =========================================================================
+    const NWS_CSV_COLUMNS = [
+      "Category",
+      "CategoryCode",
+      "TerritoryNumber",
+      "Suffix",
+      "Type",
+      "Status",
+      "Number",
+      "Street",
+      "ApartmentNumber",
+      "City",
+      "State",
+      "PostalCode",
+      "Name",
+      "Phone",
+      "Notes",
+      "Latitude",
+      "Longitude",
+    ];
+
+    const NWS_BOUNDARY_COLUMNS = [
+      "Type",
+      "Status",
+      "Number",
+      "Street",
+      "ApartmentNumber",
+      "City",
+      "State",
+      "PostalCode",
+      "Name",
+      "Phone",
+      "Notes",
+      "Latitude",
+      "Longitude",
+    ];
+
+    const TH_LOCATIONS_COLUMNS = [
+      "Territory type",
+      "Territory number",
+      "Location type",
+      "Status",
+      "Latitude",
+      "Longitude",
+      "Address",
+      "Number",
+      "Street",
+      "Unit",
+      "Floor",
+      "City",
+      "County",
+      "Postal code",
+      "State",
+      "Country code",
+      "Last visited",
+      "Last updated",
+      "Date created",
+    ];
+
+    function csvEscape(val) {
+      const s = val == null ? "" : String(val);
+      if (/[",\r\n]/.test(s)) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    }
+
+    function toCsv(rows, format = "nws") {
+      if (format === "th") {
+        const header = TH_LOCATIONS_COLUMNS.join(",");
+        const body = rows.map((r) => {
+          // Always format as "<num>-<suffix>" (e.g. "81-R" rather than "R-81") so NWS parses TerritoryNumber > 0
+          const thNum = r.Suffix ? `${r.TerritoryNumber}-${r.Suffix}` : (r.TerritoryNumber || r._rawTerritoryNumber || "");
+          const streetLine = [r.Number, r.Street, r.ApartmentNumber ? `#${r.ApartmentNumber}` : ""].filter(Boolean).join(" ");
+          const csz = [r.City, [r.State, r.PostalCode].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+          const fullAddr = [streetLine, csz].filter(Boolean).join(", ");
+          const mapped = {
+            "Territory type": r.Category || "",
+            "Territory number": thNum,
+            "Location type": r.Type || "House",
+            Status: r.Status === "DNC" ? "Do not call" : "Default",
+            Latitude: r.Latitude || "",
+            Longitude: r.Longitude || "",
+            Address: fullAddr,
+            Number: r.Number || "",
+            Street: r.Street || "",
+            Unit: r.ApartmentNumber || "",
+            Floor: "",
+            City: r.City || "",
+            County: "",
+            "Postal code": r.PostalCode || "",
+            State: r.State || "",
+            "Country code": "",
+            "Last visited": "",
+            "Last updated": "",
+            "Date created": "",
+          };
+          return TH_LOCATIONS_COLUMNS.map((c) => csvEscape(mapped[c])).join(",");
+        });
+        return [header, ...body].join("\r\n");
+      }
+
+      if (format === "nws_boundary") {
+        const withCoords = rows.filter((r) => r.Latitude && r.Longitude);
+        const header = NWS_BOUNDARY_COLUMNS.join(",");
+        const body = withCoords.map((r) => NWS_BOUNDARY_COLUMNS.map((c) => csvEscape(r[c] ?? "")).join(","));
+        return [header, ...body].join("\r\n");
+      }
+
+      const header = NWS_CSV_COLUMNS.join(",");
+      const body = rows.map((r) => NWS_CSV_COLUMNS.map((c) => csvEscape(r[c] ?? "")).join(","));
+      // Clean UTF-8 WITHOUT BOM so column 1 ("Category") is never misread as "\uFEFFCategory"
+      return [header, ...body].join("\r\n");
+    }
+
+    function downloadBlob(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // =========================================================================
+    // 5. UI State & Controllers
+    // =========================================================================
+    let sourceJson = null;
+    let setupJson = null;
+    let setupChanges = [];
+    let categoryOverrides = {};
+    let sourceFilename = "Territories";
+    let allLocations = [];
+    let allFlagged = [];
+    let filteredLocations = [];
+    let currentPage = 1;
+    let isGeocoding = false;
+    let stopGeocodingFlag = false;
+    const PAGE_SIZE = 75;
+
+    const $ = (id) => document.getElementById(id);
+
+    function showToast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    // Tabs
+    function activateTab(tabName) {
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        const on = b.dataset.tab === tabName;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      document.querySelectorAll(".tab-panel").forEach((p) => {
+        p.classList.toggle("active", p.id === `tab-${tabName}`);
+      });
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+    });
+
+    // File loading
+    const dropzone = $("dropzone");
+    const fileInput = $("fileInput");
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+    });
+    $("changeFileBtn").addEventListener("click", () => fileInput.click());
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) handleFile(file);
+      fileInput.value = "";
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!parsed || !Array.isArray(parsed.features)) {
+            throw new Error("File does not look like a Territory Helper GeoJSON FeatureCollection.");
+          }
+          sourceJson = parsed;
+          sourceFilename = file.name.replace(/\.(geo)?json$/i, "");
+          initCategoryOverrides();
+          $("fileLoadedInfo").textContent = `Loaded "${file.name}" — ${parsed.features.length} territories found.`;
+          $("fileLoadedBar").classList.add("show");
+          recomputeAll();
+          showToast(`Loaded ${parsed.features.length} territories!`);
+        } catch (err) {
+          alert("Could not parse JSON file:\n" + err.message);
+        }
+      };
+      reader.readAsText(file, "utf-8");
+    }
+
+    function initCategoryOverrides() {
+      categoryOverrides = {};
+      for (const f of sourceJson.features || []) {
+        const p = f.properties || {};
+        const origCat = (p.TerritoryType || "Uncategorized").trim();
+        if (!(origCat in categoryOverrides)) {
+          categoryOverrides[origCat] = {
+            name: origCat,
+            code: (p.TerritoryTypeCode || "").trim().toUpperCase(),
+          };
+        }
+      }
+    }
+
+    function getSetupOptions() {
+      return {
+        normalizeNumbers: $("optNormNumbers").checked,
+        fixDuplicates: $("optFixDuplicates").checked,
+        appendCategorySuffix: $("optAppendCatSuffix").checked,
+        syncLabel: $("optSyncLabel").checked,
+        categoryOverrides,
+      };
+    }
+
+    function recomputeAll() {
+      if (!sourceJson) return;
+      const res = applyTerritorySetupFixes(sourceJson, getSetupOptions());
+      setupJson = res.data;
+      setupChanges = res.changes;
+      renderSetupTab(res.audit);
+      populateTerritoryDropdowns();
+      reExtractLocations();
+      updateNotesPreview();
+    }
+
+    function renderSetupTab(audit) {
+      $("kpiSetupTotal").textContent = audit.total.toLocaleString();
+      $("kpiSetupCats").textContent = audit.categories.toLocaleString();
+      $("kpiSetupBadNums").textContent = audit.nonStandardFixed.toLocaleString();
+      $("kpiSetupDups").textContent = audit.duplicatesFixed.toLocaleString();
+      $("kpiSetupCodeWarn").textContent = audit.sharedCodeCategories > 0
+        ? `${audit.sharedCodeCategories} sharing`
+        : "All unique";
+
+      $("btnAutoAssignCodes").disabled = false;
+      $("btnQuickDownloadJson").disabled = false;
+      $("btnGoToNotes").disabled = false;
+      $("btnGoToLocations").disabled = false;
+
+      // Build category summary table
+      const countsByOrig = {};
+      const sampleByOrig = {};
+      const origFeatures = sourceJson.features || [];
+      const fixedFeatures = setupJson.features || [];
+      for (let i = 0; i < origFeatures.length; i++) {
+        const oc = (origFeatures[i].properties?.TerritoryType || "Uncategorized").trim();
+        countsByOrig[oc] = (countsByOrig[oc] || 0) + 1;
+        if (!sampleByOrig[oc]) {
+          const fp = fixedFeatures[i]?.properties || {};
+          const effCode = fp.TerritoryTypeCode || (fp.TerritoryType ? fp.TerritoryType[0].toUpperCase() : "T");
+          sampleByOrig[oc] = `${effCode}-${fp.TerritoryNumber || "1"}`;
+        }
+      }
+
+      const tbody = $("setupCatsTbody");
+      tbody.innerHTML = Object.keys(categoryOverrides)
+        .sort()
+        .map((origCat) => {
+          const ov = categoryOverrides[origCat];
+          return `<tr>
+            <td><strong>${escapeHtml(origCat)}</strong></td>
+            <td>${countsByOrig[origCat] || 0}</td>
+            <td><input type="text" data-cat-field="name" data-orig-cat="${escapeHtml(origCat)}" value="${escapeHtml(ov.name)}" style="width:100%; padding:5px 8px; border:1px solid var(--border-strong); border-radius:5px; font-size:0.84rem;" /></td>
+            <td><input type="text" data-cat-field="code" data-orig-cat="${escapeHtml(origCat)}" value="${escapeHtml(ov.code)}" maxlength="3" placeholder="(auto 1st letter)" style="width:120px; padding:5px 8px; border:1px solid var(--border-strong); border-radius:5px; font-size:0.84rem; text-transform:uppercase;" /></td>
+            <td><code>${escapeHtml(sampleByOrig[origCat] || "")}</code></td>
+          </tr>`;
+        })
+        .join("");
+
+      $("setupChangesSummary").textContent = `Territory Naming Changes Preview (${setupChanges.length})`;
+      if (!setupChanges.length) {
+        $("setupChangesList").innerHTML = '<div style="color:var(--green); padding:6px 0;">All territory numbers and categories are already NWS-ready!</div>';
+      } else {
+        $("setupChangesList").innerHTML = setupChanges
+          .map((c) => `<div class="flagged-item"><span class="flagged-terr">${escapeHtml(c.before)} → ${escapeHtml(c.after)}</span><span>${escapeHtml(c.reason)}</span></div>`)
+          .join("");
+      }
+    }
+
+    function populateTerritoryDropdowns() {
+      const features = (setupJson || sourceJson).features || [];
+      const cats = [...new Set(features.map((f) => f.properties?.TerritoryType || "").filter(Boolean))].sort();
+      const prevCat = $("filterCategory").value;
+      const catSel = $("filterCategory");
+      catSel.innerHTML = '<option value="">All Categories</option>' +
+        cats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+      if (cats.includes(prevCat)) catSel.value = prevCat;
+
+      const prevIdx = $("previewTerrSelect").value;
+      const previewSel = $("previewTerrSelect");
+      previewSel.innerHTML = features
+        .map((f, idx) => {
+          const name = f.properties?.name || `Territory #${idx + 1}`;
+          return `<option value="${idx}">${escapeHtml(name)}</option>`;
+        })
+        .join("");
+
+      if (prevIdx !== "" && Number(prevIdx) < features.length) {
+        previewSel.value = prevIdx;
+      } else {
+        const firstWithNotes = features.findIndex((f) => f.properties?.TerritoryNotes);
+        if (firstWithNotes >= 0) previewSel.value = String(firstWithNotes);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function getExtractionOptions() {
+      return {
+        defaultState: $("optDefaultState").value.trim().toUpperCase(),
+        defaultCity: $("optDefaultCity").value.trim(),
+        defaultType: $("optDefaultType").value,
+        dncMode: $("optDncMode").value,
+        includePhone: $("optPhone").checked,
+        includePoBox: $("optPoBox").checked,
+        deduplicate: $("optDedup").checked,
+        splitSuffix: $("optSplitSuffix").checked,
+      };
+    }
+
+    function reExtractLocations() {
+      const activeData = setupJson || sourceJson;
+      if (!activeData) return;
+      const opts = getExtractionOptions();
+      allLocations = [];
+      allFlagged = [];
+      let idSeq = 1;
+
+      for (const f of activeData.features || []) {
+        const { records, flagged } = extractTerritoryLocations(f, opts);
+        for (const r of records) {
+          r._id = idSeq++;
+          allLocations.push(r);
+        }
+        allFlagged.push(...flagged);
+      }
+
+      updateTerritoryFilterOptions();
+      applyFiltersAndRender();
+      renderFlagged();
+    }
+
+    function updateTerritoryFilterOptions() {
+      const cat = $("filterCategory").value;
+      const terrs = [
+        ...new Set(
+          allLocations
+            .filter((r) => !cat || r.Category === cat)
+            .map((r) => r._territoryName)
+        ),
+      ];
+      const prev = $("filterTerritory").value;
+      $("filterTerritory").innerHTML =
+        '<option value="">All Territories</option>' +
+        terrs.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+      if (terrs.includes(prev)) $("filterTerritory").value = prev;
+    }
+
+    function applyFiltersAndRender() {
+      const cat = $("filterCategory").value;
+      const terr = $("filterTerritory").value;
+      const status = $("filterStatus").value;
+      const q = $("filterSearch").value.trim().toLowerCase();
+
+      filteredLocations = allLocations.filter((r) => {
+        if (cat && r.Category !== cat) return false;
+        if (terr && r._territoryName !== terr) return false;
+        if (status && r.Status !== status) return false;
+        if (q) {
+          const hay = `${r.Category} ${r.TerritoryNumber} ${r.Suffix} ${r.Number} ${r.Street} ${r.ApartmentNumber} ${r.City} ${r.PostalCode} ${r.Name} ${r.Phone} ${r.Notes}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      const terrSet = new Set(allLocations.map((r) => r._territoryName));
+      const dncCount = allLocations.filter((r) => r.Status === "DNC").length;
+      $("kpiTerritories").textContent = terrSet.size.toLocaleString();
+      $("kpiTotal").textContent = allLocations.length.toLocaleString();
+      $("kpiAvailable").textContent = (allLocations.length - dncCount).toLocaleString();
+      $("kpiDnc").textContent = dncCount.toLocaleString();
+      $("kpiFlagged").textContent = allFlagged.length.toLocaleString();
+
+      const hasData = allLocations.length > 0;
+      $("btnDownloadCsv").disabled = !hasData;
+      $("btnDownloadFilteredCsv").disabled = filteredLocations.length === 0;
+      $("btnGeocodeFiltered").disabled = filteredLocations.length === 0 || isGeocoding;
+      $("btnCopyCsv").disabled = filteredLocations.length === 0;
+      $("btnAddRow").disabled = !sourceJson;
+
+      currentPage = 1;
+      renderTablePage();
+    }
+
+    function renderTablePage() {
+      const tbody = $("locationsTbody");
+      const total = filteredLocations.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="17" class="empty-state">${
+          sourceJson ? "No locations match the current filter." : 'Load a Territory Helper <code>.json</code> file above to extract locations.'
+        }</td></tr>`;
+        $("pagerInfo").textContent = "Showing 0 locations";
+        $("pageNumLabel").textContent = "Page 1 / 1";
+        $("btnPrevPage").disabled = true;
+        $("btnNextPage").disabled = true;
+        return;
+      }
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const slice = filteredLocations.slice(start, start + PAGE_SIZE);
+
+      const editableCols = [
+        "Category", "CategoryCode", "TerritoryNumber", "Suffix", "Type", null,
+        "Number", "Street", "ApartmentNumber", "City", "State",
+        "PostalCode", "Name", "Phone", "Notes"
+      ];
+
+      tbody.innerHTML = slice
+        .map((r) => {
+          const cells = editableCols
+            .map((col) => {
+              if (col === null) {
+                const cls = r.Status === "DNC" ? "badge-dnc" : "badge-avail";
+                return `<td><span class="badge ${cls}" data-action="toggle-status" data-id="${r._id}" title="Click to toggle Available / DNC">${escapeHtml(r.Status)}</span></td>`;
+              }
+              return `<td class="editable" contenteditable="true" data-id="${r._id}" data-col="${col}">${escapeHtml(r[col])}</td>`;
+            })
+            .join("");
+          const coordText = r.Latitude && r.Longitude ? `${r.Latitude}, ${r.Longitude}` : "—";
+          return `<tr>${cells}<td style="font-size:0.76rem; color:var(--text-muted); white-space:nowrap;">${escapeHtml(coordText)}</td><td><button class="del-btn" data-action="delete" data-id="${r._id}" title="Remove row">✕</button></td></tr>`;
+        })
+        .join("");
+
+      $("pagerInfo").textContent = `Showing ${(start + 1).toLocaleString()}–${Math.min(start + slice.length, total).toLocaleString()} of ${total.toLocaleString()} matching locations`;
+      $("pageNumLabel").textContent = `Page ${currentPage} / ${totalPages}`;
+      $("btnPrevPage").disabled = currentPage <= 1;
+      $("btnNextPage").disabled = currentPage >= totalPages;
+    }
+
+    function renderFlagged() {
+      $("flaggedSummary").textContent = `Unparsed / Unusual Lines to Spot-Check (${allFlagged.length})`;
+      if (!allFlagged.length) {
+        $("flaggedList").innerHTML = '<div style="color:var(--green); padding:6px 0;">All note lines were cleanly parsed or recognized as standard headers!</div>';
+        return;
+      }
+      $("flaggedList").innerHTML = allFlagged
+        .map((fl) => `<div class="flagged-item"><span class="flagged-terr">${escapeHtml(fl.territory)}</span><span>${escapeHtml(fl.line)}</span></div>`)
+        .join("");
+    }
+
+    // Inline editing & row actions
+    $("locationsTbody").addEventListener("blur", (e) => {
+      const td = e.target.closest("td.editable");
+      if (!td) return;
+      const id = Number(td.dataset.id);
+      const col = td.dataset.col;
+      const rec = allLocations.find((r) => r._id === id);
+      if (rec) rec[col] = td.textContent.trim();
+    }, true);
+
+    $("locationsTbody").addEventListener("click", (e) => {
+      const toggle = e.target.closest('[data-action="toggle-status"]');
+      if (toggle) {
+        const id = Number(toggle.dataset.id);
+        const rec = allLocations.find((r) => r._id === id);
+        if (rec) {
+          rec.Status = rec.Status === "DNC" ? "Available" : "DNC";
+          applyFiltersAndRender();
+        }
+        return;
+      }
+      const del = e.target.closest('[data-action="delete"]');
+      if (del) {
+        const id = Number(del.dataset.id);
+        allLocations = allLocations.filter((r) => r._id !== id);
+        applyFiltersAndRender();
+      }
+    });
+
+    // Add manual row
+    $("btnAddRow").addEventListener("click", () => {
+      const selectedTerr = $("filterTerritory").value;
+      const sample = filteredLocations[0] || allLocations[0];
+      const catVal = $("filterCategory").value || (sample ? sample.Category : "");
+      const newRec = {
+        _id: Date.now() + Math.floor(Math.random() * 1000),
+        Category: catVal,
+        CategoryCode: sample ? sample.CategoryCode : (catVal ? catVal[0].toUpperCase() : ""),
+        TerritoryNumber: selectedTerr && sample ? sample.TerritoryNumber : "",
+        Suffix: selectedTerr && sample ? sample.Suffix : "",
+        Type: $("optDefaultType").value,
+        Status: "Available",
+        Number: "",
+        Street: "",
+        ApartmentNumber: "",
+        City: $("optDefaultCity").value.trim() || (sample ? sample.City : ""),
+        State: $("optDefaultState").value.trim().toUpperCase(),
+        PostalCode: sample ? sample.PostalCode : "",
+        Name: "",
+        Phone: "",
+        Notes: "",
+        Latitude: "",
+        Longitude: "",
+        _territoryName: selectedTerr || (sample ? sample._territoryName : "Manual"),
+      };
+      allLocations.unshift(newRec);
+      applyFiltersAndRender();
+      showToast("Added blank row at the top — click cells to fill it in.");
+    });
+
+    // Filter & Option listeners
+    ["optDncMode", "optDefaultState", "optDefaultCity", "optDefaultType", "optSplitSuffix", "optDedup", "optPoBox", "optPhone"].forEach((id) => {
+      $(id).addEventListener("change", reExtractLocations);
+    });
+    $("filterCategory").addEventListener("change", () => {
+      updateTerritoryFilterOptions();
+      applyFiltersAndRender();
+    });
+    $("filterTerritory").addEventListener("change", applyFiltersAndRender);
+    $("filterStatus").addEventListener("change", applyFiltersAndRender);
+    $("filterSearch").addEventListener("input", applyFiltersAndRender);
+
+    $("btnPrevPage").addEventListener("click", () => { currentPage--; renderTablePage(); });
+    $("btnNextPage").addEventListener("click", () => { currentPage++; renderTablePage(); });
+
+    // Downloads (Tab 1)
+    $("btnDownloadCsv").addEventListener("click", () => {
+      const fmt = $("optCsvFormat").value;
+      const csv = toCsv(allLocations, fmt);
+      const suffix = fmt === "th" ? "TerritoryHelper_Locations" : fmt === "nws_boundary" ? "NWS_Locations_ByBoundary" : "NWS_Locations";
+      downloadBlob(csv, `${sourceFilename}_${suffix}.csv`, "text/csv;charset=utf-8");
+      showToast(`Downloaded ${suffix}.csv!`);
+    });
+
+    $("btnDownloadFilteredCsv").addEventListener("click", () => {
+      const fmt = $("optCsvFormat").value;
+      const terr = $("filterTerritory").value;
+      const cat = $("filterCategory").value;
+      const tag = (terr || cat || "Filtered").replace(/[^A-Za-z0-9_-]+/g, "_");
+      const csv = toCsv(filteredLocations, fmt);
+      downloadBlob(csv, `${sourceFilename}_${tag}_Locations.csv`, "text/csv;charset=utf-8");
+      showToast(`Downloaded ${filteredLocations.length.toLocaleString()} filtered locations!`);
+    });
+
+    $("btnCopyCsv").addEventListener("click", async () => {
+      try {
+        const fmt = $("optCsvFormat").value;
+        await navigator.clipboard.writeText(toCsv(filteredLocations, fmt));
+        showToast(`Copied ${filteredLocations.length.toLocaleString()} rows to clipboard!`);
+      } catch {
+        showToast("Clipboard copy blocked by browser — use Download CSV instead.");
+      }
+    });
+
+    // Optional browser-side geocoding for filtered rows (OpenStreetMap Nominatim, ~1 req/sec)
+    $("btnGeocodeFiltered").addEventListener("click", async () => {
+      if (isGeocoding) {
+        stopGeocodingFlag = true;
+        return;
+      }
+      const targets = filteredLocations.filter(
+        (r) => r.Number && r.Street && r.Street.toLowerCase() !== "po box" && (!r.Latitude || !r.Longitude)
+      );
+      if (!targets.length) {
+        showToast("All filtered street addresses already have Lat/Lon (or none are geocodable).");
+        return;
+      }
+      if (targets.length > 100) {
+        const ok = confirm(
+          `You have ${targets.length} filtered addresses. Browser geocoding runs at ~1 address/second (about ${Math.ceil(targets.length / 60)} min). For bulk geocoding 5,000+ addresses in seconds, use geocode_nws_locations.py.\n\nFilter to 1 territory first, or click OK to geocode these ${targets.length} addresses now.`
+        );
+        if (!ok) return;
+      }
+
+      isGeocoding = true;
+      stopGeocodingFlag = false;
+      const btn = $("btnGeocodeFiltered");
+      const statusEl = $("geocodeStatus");
+      btn.textContent = "⏹ Stop Geocoding";
+      statusEl.style.display = "block";
+
+      let found = 0;
+      let missed = 0;
+      for (let i = 0; i < targets.length; i++) {
+        if (stopGeocodingFlag) break;
+        const r = targets[i];
+        const q = [ `${r.Number} ${r.Street}`, r.City, r.State, r.PostalCode, "USA" ].filter(Boolean).join(", ");
+        statusEl.textContent = `Resolving ${i + 1} / ${targets.length} (Found: ${found}, Not found: ${missed}) — ${q}`;
+        try {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=${encodeURIComponent(q)}`;
+          const resp = await fetch(url, { headers: { Accept: "application/json" } });
+          if (resp.ok) {
+            const arr = await resp.json();
+            if (arr && arr.length) {
+              r.Latitude = Number(arr[0].lat).toFixed(6);
+              r.Longitude = Number(arr[0].lon).toFixed(6);
+              found++;
+            } else {
+              missed++;
+            }
+          } else {
+            missed++;
+          }
+        } catch {
+          missed++;
+        }
+        renderTablePage();
+        if (i + 1 < targets.length && !stopGeocodingFlag) {
+          await new Promise((res) => setTimeout(res, 1100));
+        }
+      }
+
+      isGeocoding = false;
+      btn.textContent = "📍 Resolve Lat/Lon (Filtered Rows)";
+      btn.disabled = filteredLocations.length === 0;
+      statusEl.textContent = `Geocoding finished — Resolved: ${found}, Not found: ${missed}. Click "Download Filtered / Selected Territory CSV" to export with Lat/Lon.`;
+      showToast(`Resolved ${found} of ${targets.length} addresses!`);
+    });
+
+    // Tab 1 (Setup) listeners
+    ["optNormNumbers", "optFixDuplicates", "optAppendCatSuffix", "optSyncLabel"].forEach((id) => {
+      $(id).addEventListener("change", recomputeAll);
+    });
+
+    $("setupCatsTbody").addEventListener("change", (e) => {
+      const inp = e.target.closest("input[data-cat-field]");
+      if (!inp) return;
+      const origCat = inp.dataset.origCat;
+      const field = inp.dataset.catField;
+      if (categoryOverrides[origCat]) {
+        categoryOverrides[origCat][field] = field === "code" ? inp.value.trim().toUpperCase() : inp.value.trim();
+        recomputeAll();
+      }
+    });
+
+    $("btnAutoAssignCodes").addEventListener("click", () => {
+      if (!sourceJson) return;
+      const used = new Set();
+      for (const origCat of Object.keys(categoryOverrides).sort()) {
+        const code = suggestCategoryCode(categoryOverrides[origCat].name || origCat, used);
+        used.add(code);
+        categoryOverrides[origCat].code = code;
+      }
+      recomputeAll();
+      showToast("Assigned unique Category Codes to all categories!");
+    });
+
+    $("btnGoToNotes").addEventListener("click", () => activateTab("notes"));
+    $("btnGoToLocations").addEventListener("click", () => activateTab("locations"));
+
+    // Tab 2: GeoJSON Notes Cleaner (uses setupJson so Tab 1 fixes are included!)
+    function updateNotesPreview() {
+      const activeData = setupJson || sourceJson;
+      if (!activeData) return;
+      const mode = $("optNotesMode").value;
+      const cleanHtml = $("optCleanHtml").checked;
+      const { data, stats } = buildUpdatedGeoJson(activeData, mode, cleanHtml);
+
+      $("btnDownloadGeoJson").disabled = false;
+      $("notesSummaryText").textContent =
+        `${stats.total} territories (${stats.combined} combined, ${stats.movedOnly} moved, ${stats.keptLabel} label-only, ${stats.empty} blank)`;
+
+      const idx = Number($("previewTerrSelect").value || 0);
+      const origF = sourceJson.features[idx];
+      const newF = data.features[idx];
+      if (origF && newF) {
+        const op = origF.properties || {};
+        const np = newF.properties || {};
+        $("previewBefore").textContent =
+          `[Territory] ${op.TerritoryType || ""} | #${op.TerritoryNumber || "(blank)"}${op.TerritoryTypeCode ? ` [Code: ${op.TerritoryTypeCode}]` : ""}\n\n` +
+          `[NWS Notes ← description]\n${op.description || "(empty)"}\n\n` +
+          `[NWS Custom ← TerritoryNotes]\n${op.TerritoryNotes || "(empty)"}`;
+        $("previewAfter").textContent =
+          `[Territory] ${np.TerritoryType || ""} | #${np.TerritoryNumber || "(blank)"}${np.TerritoryTypeCode ? ` [Code: ${np.TerritoryTypeCode}]` : ""}\n\n` +
+          `[NWS Notes ← description]\n${np.description || "(empty)"}\n\n` +
+          `[NWS Custom ← TerritoryNotes]\n${np.TerritoryNotes || "(empty)"}`;
+      }
+    }
+
+    function downloadNwsGeoJson() {
+      const activeData = setupJson || sourceJson;
+      if (!activeData) return;
+      const mode = $("optNotesMode").value;
+      const cleanHtml = $("optCleanHtml").checked;
+      const { data } = buildUpdatedGeoJson(activeData, mode, cleanHtml);
+      downloadBlob(JSON.stringify(data, null, 2), `${sourceFilename}_NWS_Ready.json`, "application/json;charset=utf-8");
+      showToast("Downloaded NWS-Ready GeoJSON!");
+    }
+
+    $("optNotesMode").addEventListener("change", updateNotesPreview);
+    $("optCleanHtml").addEventListener("change", updateNotesPreview);
+    $("previewTerrSelect").addEventListener("change", updateNotesPreview);
+    $("btnDownloadGeoJson").addEventListener("click", downloadNwsGeoJson);
+    $("btnQuickDownloadJson").addEventListener("click", downloadNwsGeoJson);
+  </script>
+</body>
+</html>
